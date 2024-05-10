@@ -1,7 +1,6 @@
 from datetime import datetime
 from field import Field
-
-DATE_FORMAT = "%d.%m.%Y"
+from constants import DATE_FORMAT
 
 
 class Birthday(Field):
