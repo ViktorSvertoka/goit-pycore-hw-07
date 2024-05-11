@@ -4,7 +4,7 @@ from record import Record
 not_found_message = "Contact does not exist, you can add it"
 
 
-def handle_error(func):
+def input_error(func):
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -14,7 +14,7 @@ def handle_error(func):
     return inner
 
 
-@handle_error
+@input_error
 def add_contact(args, book: AddressBook):
     name, phone = args
     record = book.find(name)
@@ -28,7 +28,7 @@ def add_contact(args, book: AddressBook):
     return message
 
 
-@handle_error
+@input_error
 def change_contact(args, book: AddressBook):
     if len(args) != 3:
         return "Invalid number of arguments. Usage: change [name] [old_number] [new_number]"
@@ -41,7 +41,7 @@ def change_contact(args, book: AddressBook):
         return "Phone changed"
 
 
-@handle_error
+@input_error
 def show_phone(args, book: AddressBook):
     if len(args) != 1:
         return "Invalid number of arguments. Usage: phone [name]"
@@ -52,7 +52,7 @@ def show_phone(args, book: AddressBook):
     return record
 
 
-@handle_error
+@input_error
 def add_birthday(args, book: AddressBook):
     if len(args) != 2:
         return "Invalid number of arguments. Usage: add-birthday [name] [date]"
@@ -65,7 +65,7 @@ def add_birthday(args, book: AddressBook):
         return not_found_message
 
 
-@handle_error
+@input_error
 def show_birthday(args, book: AddressBook):
     if len(args) != 1:
         return "Invalid number of arguments. Usage: show-birthday [name]"
