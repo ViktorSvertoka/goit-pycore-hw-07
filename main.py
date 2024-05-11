@@ -1,35 +1,121 @@
 from address_book import AddressBook
 from record import Record
 
-# Creating a new address book
-book = AddressBook()
+not_found_message = "Contact does not exist, you can add it"
 
-# Creating a record for John
-john_record = Record("John")
-john_record.add_phone("1234567890")
-john_record.add_phone("5555555555")
 
-# Adding John's record to the address book
-book.add_record(john_record)
+def handle_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as error:
+            return str(error)
 
-# Creating and adding a new record for Jane
-jane_record = Record("Jane")
-jane_record.add_phone("9876543210")
-book.add_record(jane_record)
+    return inner
 
-# Printing all records in the book
-for name, record in book.data.items():
-    print(record)
 
-# Finding and editing the phone number for John
-john = book.find("John")
-john.edit_phone("1234567890", "1112223333")
+@handle_error
+def add_contact(args, book: AddressBook):
+    name, phone = args
+    record = book.find(name)
+    message = "Contact updated."
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
+        message = "Contact added."
+    if phone:
+        record.add_phone(phone)
+    return message
 
-print(john)  # Output: Contact name: John, phones: 1112223333; 5555555555
 
-# Searching for a specific phone number in John's record
-found_phone = john.find_phone("5555555555")
-print(f"{john.name}: {found_phone}")  # Output: 5555555555
+@handle_error
+def change_contact(args, book: AddressBook):
+    if len(args) != 3:
+        return "Invalid number of arguments. Usage: change [name] [old_number] [new_number]"
+    name, old_number, new_number = args
+    record = book.find(name)
+    if record is None:
+        return not_found_message
+    else:
+        record.edit_phone(old_number, new_number)
+        return "Phone changed"
 
-# Deleting Jane's record
-book.delete("Jane")
+
+@handle_error
+def show_phone(args, book: AddressBook):
+    if len(args) != 1:
+        return "Invalid number of arguments. Usage: phone [name]"
+    name = args[0]
+    record = book.find(name)
+    if record is None:
+        return not_found_message
+    return record
+
+
+@handle_error
+def add_birthday(args, book: AddressBook):
+    if len(args) != 2:
+        return "Invalid number of arguments. Usage: add-birthday [name] [date]"
+    name, date = args
+    record = book.find(name)
+    if record:
+        record.add_birthday(date)
+        return "Birthday added."
+    else:
+        return not_found_message
+
+
+@handle_error
+def show_birthday(args, book: AddressBook):
+    if len(args) != 1:
+        return "Invalid number of arguments. Usage: show-birthday [name]"
+    name = args[0]
+    record = book.find(name)
+    if record:
+        if record.birthday:
+            return record.birthday
+        else:
+            return "Birthday not added to this contact."
+    else:
+        return not_found_message
+
+
+def parse_input(user_input):
+    cmd, *args = user_input.split()
+    cmd = cmd.strip().lower()
+    return cmd, *args
+
+
+def main():
+    book = AddressBook()
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ")
+        command, *args = parse_input(user_input)
+
+        match command:
+            case "hello":
+                print("How can I help you?")
+            case "close" | "exit":
+                print("Good bye!")
+                break
+            case "add":
+                print(add_contact(args, book))
+            case "change":
+                print(change_contact(args, book))
+            case "phone":
+                print(show_phone(args, book))
+            case "all":
+                print(book)
+            case "add-birthday":
+                print(add_birthday(args, book))
+            case "show-birthday":
+                print(show_birthday(args, book))
+            case "birthdays":
+                print(book.get_upcoming_birthdays())
+            case _:
+                print("Invalid command.")
+
+
+if __name__ == "__main__":
+    main()
