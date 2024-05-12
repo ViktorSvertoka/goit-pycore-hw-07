@@ -162,4 +162,4 @@ return message
 
 ### Результат виконаного ДЗ
 
-![Results](./01_image.png)
+![Results](./01_screen.png)
